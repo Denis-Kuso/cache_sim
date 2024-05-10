@@ -50,6 +50,22 @@ int main(int argc, char *argv[])
         printf("verbose enabled\n");
     }
     fprintf(stdout, "Args parsed: -s %d -E %d -b %d -t %s\n", set, lines, bytes, tracefile);
+    FILE * pFile;
+    pFile = fopen(tracefile, "r");
+    if (!pFile) {
+        fprintf(stderr, "unable to open %s\n", tracefile);
+        exit(EXIT_FAILURE);
+    }
+    char operation_id;
+    unsigned address;
+    int size;
+    // Line is of format " M 0x3242,4" or "I 0x324234,4"
+    const char *format = " %c %10x,%d";
+    int i = 0;
+    while (fscanf(pFile, format, &operation_id, &address, &size) > 0) {
+        printf("Parsed line: #%d. Operation: %c, address: %10x, size: %d\n", i, operation_id, address, size);
+        i++;
+    }
     printSummary(set, lines, bytes);
     return 0;
 }
