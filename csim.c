@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
         printf("Parsed line: #%d. Operation: %c, address: %10x, size: %d\n", i, operation_id, address, size);
         i++;
     }
+    fclose(pFile);
     printSummary(set, lines, bytes);
     return 0;
 }
