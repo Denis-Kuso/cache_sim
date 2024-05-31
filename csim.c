@@ -5,16 +5,17 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdbool.h>
+//#include "init_cache.c"
 
 int main(int argc, char *argv[])
 {
 //usage: `./csim-ref [-hv] -s <s> -E <E> -b <b> -t <tracefile>`
     int opt;
-    uint16_t set, lines, bytes;
+    uint16_t setBits, lines, bytes;
     char *tracefile;
     bool verbose;
 
-    set = 1;
+    setBits = 1;
     lines = 1;
     bytes = 1;
     verbose = false;
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
                 verbose = true;
                 break;
             case 's':
-                set = atoi(optarg);
+                setBits = atoi(optarg);
                 break;
             case 'E': 
                 lines = atoi(optarg);
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
     if (verbose) {
         printf("verbose enabled\n");
     }
-    fprintf(stdout, "Args parsed: -s %d -E %d -b %d -t %s\n", set, lines, bytes, tracefile);
+    fprintf(stdout, "Args parsed: -s %d -E %d -b %d -t %s\n", setBits, lines, bytes, tracefile);
     FILE * pFile;
     pFile = fopen(tracefile, "r");
     if (!pFile) {
@@ -57,16 +58,16 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     char operation_id;
-    unsigned address;
+    unsigned long long address;
     int size;
     // Line is of format " M 0x3242,4" or "I 0x324234,4"
-    const char *format = " %c %10x,%d";
+    const char *format = " %c %llx,%d";
     int i = 0;
     while (fscanf(pFile, format, &operation_id, &address, &size) > 0) {
-        printf("Parsed line: #%d. Operation: %c, address: %10x, size: %d\n", i, operation_id, address, size);
+        printf("Parsed line: #%d. Operation: %c, address: %10llx, size: %d\n", i, operation_id, address, size);
         i++;
     }
     fclose(pFile);
-    printSummary(set, lines, bytes);
+    printSummary(setBits, lines, bytes);
     return 0;
 }
