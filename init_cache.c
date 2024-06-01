@@ -27,13 +27,13 @@ cache_line **init_cache(int setBits, int lines){
     cache = malloc(sets * sizeof(int *));
     if (!cache) {
         fprintf(stderr, "No memory! Cannot allocate cache sets\n");
-        return EXIT_FAILURE;
+        return NULL;
     }
     for (int i = 0; i < sets; i++) {
         cache[i] = (cache_line*)malloc(lines * sizeof(cache_line));
         if (!cache[i]) {
             fprintf(stderr, "No memory! Cannot allocate cache lines\n");
-            return EXIT_FAILURE;
+            return NULL;
         }
     }
     // init empty cache
@@ -45,4 +45,13 @@ cache_line **init_cache(int setBits, int lines){
         }
     }
     return cache;
+}
+
+int free_cache(cache_line **cache, int setBits, int lines) {
+    int sets = 1 << setBits;
+    for (int i = 0; i < sets; i++) {
+        free(cache[i]);
+    }
+    free(cache);
+    return 0;
 }
