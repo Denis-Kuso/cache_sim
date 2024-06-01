@@ -73,6 +73,10 @@ int main(int argc, char *argv[])
     int const OPERATIONS = 2;
     while (fscanf(pFile, format, &operation_id, &address, &size) > 0) {
         printf("Parsed line: #%d. Operation: %c, address: %10llx, size: %d\n", counter, operation_id, address, size);
+        // not interested
+        if (operation_id == 'I') {
+            continue;
+        }
         iters = 0;
         if (operation_id != 'M') {
             printf("will do iter once\n");
