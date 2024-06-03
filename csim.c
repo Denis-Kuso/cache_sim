@@ -1,5 +1,6 @@
 #include "cachelab.h"
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -47,9 +48,6 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
         }
     }
-    if (verbose) {
-        printf("verbose enabled\n");
-    }
     fprintf(stdout, "Args parsed: -s %d -E %d -b %d -t %s\n", setBits, lines, bytes, tracefile);
     FILE * pFile;
     pFile = fopen(tracefile, "r");
@@ -71,15 +69,16 @@ int main(int argc, char *argv[])
     int const sets = 1 << setBits;
     int iters;
     int const OPERATIONS = 2;
+    char result[20];
     while (fscanf(pFile, format, &operation_id, &address, &size) > 0) {
-        printf("Parsed line: #%d. Operation: %c, address: %10llx, size: %d\n", counter, operation_id, address, size);
+        //printf("Parsed line: #%d. Operation: %c, address: %10llx, size: %d\n", counter, operation_id, address, size);
+        memset(result,0,strlen(result));
         // not interested
         if (operation_id == 'I') {
             continue;
         }
         iters = 0;
         if (operation_id != 'M') {
-            printf("will do iter once\n");
             iters++;
         }
         // modify is a read and a write (so two access operations)
@@ -89,29 +88,31 @@ int main(int argc, char *argv[])
         for (int i = 0; i < sets; i++) {
             for (int j = 0;j < lines; j++) {
                 cache[i][j].LRU += 1;
-                }
+            }
         }
         bool cached = false;
       // extract sID
         int setID = extractSetBits(address, bytes, setBits);
         // extract Tag
         int tag = extractTagBits(address, bytes, setBits);
-        // is address cached (M requires two operations)
+        // is address cached
         for (int j = 0; j < lines; j++) {
             cached = (cache[setID][j].valid && (cache[setID][j].tag == tag));
             if (cached) {
+                strcat(result, "hit ");
                 hits++; // dont forget to update LRU
                 cache[setID][j].LRU = 0;
                 break;
             }
         }
         if (!cached) {
+            strcat(result, "miss ");
             misses++; 
             bool full = true;
             int max = -1;
             int max_index = 0;
             for (int j = 0; j < lines; j++) {
-                // perhaps store index of max LRU in case eviction is neccessary
+                // store index of max LRU in case eviction is neccessary
                 if (cache[setID][j].LRU > max) {
                     max_index = j;
                 }
@@ -124,8 +125,9 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            // store somewhere, update LRU
+            // store at max_index, update LRU
             if (full) {
+                strcat(result, "eviction ");
                 evictions++;
                 // evict at max_index
                 cache[setID][max_index].valid = true; // redundant?
@@ -133,7 +135,10 @@ int main(int argc, char *argv[])
                 cache[setID][max_index].tag = tag;
             }
         }
-            iters++;
+        iters++;
+        }
+        if (verbose) {
+            fprintf(stdout, "%c %11llx, %d %s\n",operation_id, address, size, result);
         }
         counter++;
     }
