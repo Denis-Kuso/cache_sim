@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
             for (int j = 0; j < lines; j++) {
                 // store index of max LRU in case eviction is neccessary
                 if (cache[setID][j].LRU > max) {
+                    max = cache[setID][j].LRU;
                     max_index = j;
                 }
                 // find empty
