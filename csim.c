@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[])
 {
-//usage: `./csim-ref [-hv] -s <s> -E <E> -b <b> -t <tracefile>`
+    char * const msg = "Usage: ./cache_sim [-hv] -s <s> -E <E> -b <b> -t <tracefile>";
     int opt;
     uint16_t setBits, lines, bytes;
     char *tracefile;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     {
         switch (opt) {
             case 'h':
-                fprintf(stdout, "Usage: %s [-hv] -s <s> -E <E> -b <b> -t <tracefile>\n",argv[1]);
+                fprintf(stdout, "%s\n", msg);
                 exit(EXIT_SUCCESS);
             case 'v':
                 verbose = true;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
                 tracefile = optarg;
                 break;
             default: /* '?' */
-                fprintf(stderr, "Usage: %s [-hv] -s <s> -E <E> -b <b> -t <tracefile>\n",argv[0]);
+                fprintf(stderr, "%s\n", msg);
                 exit(EXIT_FAILURE);
         }
     }
