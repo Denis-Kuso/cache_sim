@@ -69,7 +69,7 @@ void testExtractTag() {
             int want = exp[i][j]; 
             if (want != got) {
                 printf("- [ FAIL ]:\n");
-                printf("  Address: %lx, sets: %d, bits: %d, got TAG: %u, wanted: %u\n", adrs[i], sets[j], bits[j], got, want);
+                printf("  Address: %llx, sets: %d, bits: %d, got TAG: %u, wanted: %u\n", adrs[i], sets[j], bits[j], got, want);
             }else printf("- [ PASS ]\n");
         }
     }
