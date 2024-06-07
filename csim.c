@@ -1,4 +1,3 @@
-#include "cachelab.h"
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
@@ -65,7 +64,7 @@ int main(int argc, char *argv[])
     if (!cache) {
         return EXIT_FAILURE;
     }
-    int hits, misses = 0, evictions = 0;
+    int hits = 0, misses = 0, evictions = 0;
     int const sets = 1 << setBits;
     int iters;
     int const OPERATIONS = 2;
@@ -144,6 +143,6 @@ int main(int argc, char *argv[])
         counter++;
     }
     fclose(pFile);
-    printSummary(hits, misses, evictions);
+    fprintf(stdout, "Total memory references: %d\nhits: %d, misses: %d, evictions: %d\n", hits + misses, hits, misses, evictions);
     return 0;
 }
