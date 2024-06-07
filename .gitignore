@@ -1,0 +1,8 @@
+todo.txt
+cache_sim
+
+# Object files
+*.o
+
+# Debug files
+*.dSYM/
