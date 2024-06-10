@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include "init_cache.c"
 
+void printInfo(int hits, int misses, int evictions);
+
 int main(int argc, char *argv[])
 {
     char * const msg = "Usage: ./cache_sim [-hv] -s <s> -E <E> -b <b> -t <tracefile>";
@@ -19,7 +21,6 @@ int main(int argc, char *argv[])
     lines = 1;
     bytes = 1;
     verbose = false;
-    tracefile = "";
 
     while ((opt = getopt(argc, argv, "hvs:E:b:t:" )) != -1 )
     {
@@ -47,10 +48,10 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
         }
     }
-    fprintf(stdout, "Args parsed: -s %d -E %d -b %d -t %s\n", setBits, lines, bytes, tracefile);
     FILE * pFile;
     pFile = fopen(tracefile, "r");
     if (!pFile) {
+        perror("error");
         fprintf(stderr, "unable to open %s\n", tracefile);
         exit(EXIT_FAILURE);
     }
@@ -70,7 +71,6 @@ int main(int argc, char *argv[])
     int const OPERATIONS = 2;
     char result[20];
     while (fscanf(pFile, format, &operation_id, &address, &size) > 0) {
-        //printf("Parsed line: #%d. Operation: %c, address: %10llx, size: %d\n", counter, operation_id, address, size);
         memset(result,0,strlen(result));
         // not interested
         if (operation_id == 'I') {
@@ -83,23 +83,21 @@ int main(int argc, char *argv[])
         // modify is a read and a write (so two access operations)
         while (iters < OPERATIONS) {
 
-        // increment time on every entry *
+        // increment time on every lookup 
         for (int i = 0; i < sets; i++) {
             for (int j = 0;j < lines; j++) {
                 cache[i][j].LRU += 1;
             }
         }
         bool cached = false;
-      // extract sID
         int setID = extractSetBits(address, bytes, setBits);
-        // extract Tag
         int tag = extractTagBits(address, bytes, setBits);
         // is address cached
         for (int j = 0; j < lines; j++) {
             cached = (cache[setID][j].valid && (cache[setID][j].tag == tag));
             if (cached) {
                 strcat(result, "hit ");
-                hits++; // dont forget to update LRU
+                hits++;
                 cache[setID][j].LRU = 0;
                 break;
             }
@@ -130,7 +128,7 @@ int main(int argc, char *argv[])
                 strcat(result, "eviction ");
                 evictions++;
                 // evict at max_index
-                cache[setID][max_index].valid = true; // redundant?
+                cache[setID][max_index].valid = true;
                 cache[setID][max_index].LRU = 0;
                 cache[setID][max_index].tag = tag;
             }
@@ -143,6 +141,17 @@ int main(int argc, char *argv[])
         counter++;
     }
     fclose(pFile);
-    fprintf(stdout, "Total memory references: %d\nhits: %d, misses: %d, evictions: %d\n", hits + misses, hits, misses, evictions);
+    printInfo(hits, misses, evictions);
     return 0;
+}
+
+void printInfo(int hits, int misses, int evictions) {
+    printf("hits: %d, misses: %d, evictions: %d\n", hits, misses, evictions);
+    FILE* results = fopen(".cache_output", "w");
+    if (!results) {
+        perror("ERR:");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(results, "%d %d %d", hits, misses, evictions);
+    fclose(results);
 }
