@@ -1,5 +1,8 @@
 todo.txt
 cache_sim
+testCacheSim
+# results
+.cache_output
 
 # Object files
 *.o
